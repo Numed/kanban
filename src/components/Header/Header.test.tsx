@@ -1,6 +1,7 @@
 import { render, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
-import { Header } from "./index";
+
+import  {Header}  from "./index";
 
 describe("Header component", () => {
   it("should render input and button", () => {
