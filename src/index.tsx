@@ -1,5 +1,4 @@
-import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
-import * as React from "react";
+import { ChakraProvider } from "@chakra-ui/react";
 import * as ReactDOM from "react-dom/client";
 import { App } from "./components/App";
 import * as serviceWorker from "./utils/serviceWorker";
@@ -9,12 +8,11 @@ if (!container) throw new Error("Failed to find the root element");
 const root = ReactDOM.createRoot(container);
 
 root.render(
-  <React.StrictMode>
-    <ChakraProvider>
-      <ColorModeScript />
-      <App />
-    </ChakraProvider>
-  </React.StrictMode>
+  // <React.StrictMode>
+  <ChakraProvider>
+    <App />
+  </ChakraProvider>
+  // </React.StrictMode>
 );
 
 // If you want your app to work offline and load faster, you can change

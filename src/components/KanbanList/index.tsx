@@ -1,5 +1,10 @@
 import { Box, Grid, GridItem, Text } from "@chakra-ui/react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from "react-beautiful-dnd";
 import { useEffect, useState } from "react";
 
 import { useIssuesData } from "../../stores";
@@ -24,35 +29,48 @@ const KanbanList = () => {
     });
   }, [issuesData]);
 
-  const onDragEnd = (result: any) => {
-    console.log(result);
+  const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
 
-    if (
-      !destination ||
-      !issues[source.droppableId] ||
-      !issues[destination.droppableId]
-    ) {
+    if (!destination) {
       return;
     }
 
-    const sourceItems = Array.from(issues[source.droppableId]);
-    const destinationItems = Array.from(issues[destination.droppableId]);
-    const [movedItem] = sourceItems.splice(source.index, 1);
-    destinationItems.splice(destination.index, 0, movedItem);
+    if (source.droppableId !== destination.droppableId) {
+      const movedItem = issues[source.droppableId][source.index];
 
-    setIssues({
-      ...issues,
-      [source.droppableId]: sourceItems,
-      [destination.droppableId]: destinationItems,
-    });
+      const updatedSourceItems = Array.from(issues[source.droppableId]);
+      updatedSourceItems.splice(source.index, 1);
+
+      const updatedDestinationItems = Array.from(
+        issues[destination.droppableId]
+      );
+
+      updatedDestinationItems.splice(destination.index, 0, movedItem);
+
+      setIssues({
+        ...issues,
+        [source.droppableId]: updatedSourceItems,
+        [destination.droppableId]: updatedDestinationItems,
+      });
+    } else {
+      const updatedItems = Array.from(issues[source.droppableId]);
+      const movedItem = updatedItems[source.index];
+      updatedItems.splice(source.index, 1);
+      updatedItems.splice(destination.index, 0, movedItem);
+
+      setIssues({
+        ...issues,
+        [source.droppableId]: updatedItems,
+      });
+    }
   };
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Grid w="100%" my="20px" p={6} templateColumns="repeat(3, 1fr)" gap={6}>
         {Object.entries(issues).map(([status, issuesList]) => (
-          <GridItem key={status} bgColor="gray.300" p={4}>
+          <GridItem key={status} bgColor="gray.300" p={2}>
             <Text textAlign="center" fontWeight="600" mb="15px" fontSize="18px">
               {status}
             </Text>
@@ -79,7 +97,11 @@ const KanbanList = () => {
                           {...provided.dragHandleProps}
                         >
                           <Box>
-                            <Text fontWeight="600" fontSize="16px">
+                            <Text
+                              fontWeight="600"
+                              fontSize="16px"
+                              maxWidth="350px"
+                            >
                               {issue.title}
                             </Text>
                             <Text fontSize="16px">
