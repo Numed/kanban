@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import { ActiveSearchType, IssuesDataType } from "./types";
+import { ActiveSearchType, IssuesDataType, SearchUrlType } from "./types";
 
 export const useActiveSearch = create<ActiveSearchType>((set) => ({
   isActiveSearch: false,
@@ -10,4 +10,9 @@ export const useActiveSearch = create<ActiveSearchType>((set) => ({
 export const useIssuesData = create<IssuesDataType>((set) => ({
   issuesData: [],
   setIssuesData: (state) => set(() => ({ issuesData: state })),
+}));
+
+export const useSearchUrl = create<SearchUrlType>((set) => ({
+  searchUrl: "",
+  setSearchUrl: (state) => set(() => ({ searchUrl: state })),
 }));

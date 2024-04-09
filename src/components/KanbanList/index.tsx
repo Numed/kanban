@@ -7,19 +7,34 @@ import {
 } from "react-beautiful-dnd";
 import { useEffect, useState } from "react";
 
-import { useIssuesData } from "../../stores";
+import { useIssuesData, useSearchUrl } from "../../stores";
 import { IssueType } from "../../types";
 import { formatDate } from "../../utils";
 
+const STORAGE_KEY_PREFIX = "kanban_issues_";
+
 const KanbanList = () => {
-  const { issuesData } = useIssuesData();
   const [issues, setIssues] = useState<{ [key: string]: IssueType[] }>({
     todo: [],
     inProgress: [],
     done: [],
   });
 
+  const { issuesData } = useIssuesData();
+  const { searchUrl } = useSearchUrl();
+
   useEffect(() => {
+    const storedIssues = localStorage.getItem(
+      `${STORAGE_KEY_PREFIX}${searchUrl}`
+    );
+    if (storedIssues) {
+      setIssues(JSON.parse(storedIssues));
+    } else {
+      initializeIssues();
+    }
+  }, [issuesData]);
+
+  const initializeIssues = () => {
     setIssues({
       todo: issuesData.filter((issue: IssueType) => issue.state === "open"),
       inProgress: issuesData.filter(
@@ -27,43 +42,29 @@ const KanbanList = () => {
       ),
       done: issuesData.filter((issue: IssueType) => issue.state === "closed"),
     });
-  }, [issuesData]);
+  };
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
+    if (!destination) return;
 
-    if (!destination) {
-      return;
-    }
+    const updatedIssues = { ...issues };
+    const sourceList = issues[source.droppableId];
+    const destinationList = issues[destination.droppableId];
 
-    if (source.droppableId !== destination.droppableId) {
-      const movedItem = issues[source.droppableId][source.index];
-
-      const updatedSourceItems = Array.from(issues[source.droppableId]);
-      updatedSourceItems.splice(source.index, 1);
-
-      const updatedDestinationItems = Array.from(
-        issues[destination.droppableId]
-      );
-
-      updatedDestinationItems.splice(destination.index, 0, movedItem);
-
-      setIssues({
-        ...issues,
-        [source.droppableId]: updatedSourceItems,
-        [destination.droppableId]: updatedDestinationItems,
-      });
+    if (source.droppableId === destination.droppableId) {
+      const [removed] = sourceList.splice(source.index, 1);
+      destinationList.splice(destination.index, 0, removed);
     } else {
-      const updatedItems = Array.from(issues[source.droppableId]);
-      const movedItem = updatedItems[source.index];
-      updatedItems.splice(source.index, 1);
-      updatedItems.splice(destination.index, 0, movedItem);
-
-      setIssues({
-        ...issues,
-        [source.droppableId]: updatedItems,
-      });
+      const [moved] = sourceList.splice(source.index, 1);
+      destinationList.splice(destination.index, 0, moved);
     }
+
+    setIssues(updatedIssues);
+    localStorage.setItem(
+      `${STORAGE_KEY_PREFIX}${searchUrl}`,
+      JSON.stringify(updatedIssues)
+    );
   };
 
   return (
@@ -82,7 +83,6 @@ const KanbanList = () => {
                       key={issue.id}
                       draggableId={issue.id}
                       index={index}
-                      isDragDisabled={false}
                     >
                       {(provided) => (
                         <Box

@@ -9,3 +9,8 @@ export type IssuesDataType = {
   issuesData: IssueType[];
   setIssuesData: (state: any) => void;
 };
+
+export type SearchUrlType = {
+  searchUrl: string;
+  setSearchUrl: (state: string) => void;
+};

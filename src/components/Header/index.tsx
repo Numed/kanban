@@ -9,7 +9,7 @@ import {
 import { useState } from "react";
 import { v4 as uuid } from "uuid";
 
-import { useActiveSearch, useIssuesData } from "../../stores";
+import { useActiveSearch, useIssuesData, useSearchUrl } from "../../stores";
 import { onGetIssues } from "../../service";
 import { useCustomToast } from "../../utils/toast";
 import { checkIsValidUrl, convertFirstLetterToUpperCase } from "../../utils";
@@ -30,6 +30,7 @@ export const Header = () => {
   const { isActiveSearch, setActiveSearch } = useActiveSearch();
   const { setIssuesData } = useIssuesData();
   const { showToast } = useCustomToast();
+  const { setSearchUrl } = useSearchUrl();
 
   const handleChange = (value: string) => {
     setSearchValue(value);
@@ -64,6 +65,7 @@ export const Header = () => {
     const convertedSearchValue =
       searchValue.split("/")[3] + "/" + searchValue.split("/")[4] + "/issues";
     const urls = [convertedSearchValue, convertedSearchValue + "?state=closed"];
+    setSearchUrl(convertedSearchValue);
     fetchIssues(urls);
   };
 
